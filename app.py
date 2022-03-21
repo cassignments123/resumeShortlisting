@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.secret_key = "abdhghsbghddvbnbds"
 
-con = pymysql.Connect(host="127.0.0.1",user="root",passwd="",db="resumeshortlisting")
+con = pymysql.connect(port=3306,user="root",passwd="",db="resumeshortlisting")
 cur = con.cursor()
 
 
@@ -15,7 +15,7 @@ cur = con.cursor()
 def home():
     return render_template('index.html')
 
-@app.route("/signin", methods=['GET','POST']) 
+@app.route("/signin", methods=['GET','POST'])
 def login():
     if request.method=="POST":
         email = request.form["email"]
@@ -30,7 +30,7 @@ def login():
             flash("Wrong Password")
             return redirect(url_for('login'))
         else:
-            session['loggedin'] = True 
+            session['loggedin'] = True
             return redirect(url_for('dashboard'))
     return render_template('signin.html')
 
@@ -70,7 +70,7 @@ def dashboard():
     if 'loggedin' in session:
         return render_template('dashboard.html')
     else:
-        return redirect(url_for('login'))   
+        return redirect(url_for('login'))
 
 @app.route("/job-post" , methods=["GET" , "POST"])
 def jobpost():
@@ -80,7 +80,7 @@ def jobpost():
             check_id = "select id from recruiter where company_name = '"+company_name+"'"
         return render_template('jobPost.html')
 
-@app.route('/student_resume', methods=['GET','POST'])
+@app.route("/student_resume", methods=['GET','POST'])
 def student_resume():
     if request.method=="POST":
         name = request.form["name"]
@@ -108,7 +108,7 @@ def student_resume():
         val = (name, dob, email ,number ,address ,title ,soft_skill ,technical_skill ,position ,company_name ,period_fom ,period_to ,description ,project1_title ,project1 ,project1_tech ,project2_title ,project2 ,project2_tech ,education,language)
     return render_template('student_resume.html')
 
-@app.route('/job_post', methods=['GET','POST'])
+@app.route("/job_post", methods=['GET','POST'])
 def job_post():
     if request.method=="POST":
         cname = request.form["cname"]
@@ -117,17 +117,13 @@ def job_post():
         for x in columns:
             skill = request.form["skill[]"]
             skill_query.append(getattr(skill, x))
-        
+
         experience = request.form["experience"]
         education=request.form["education"]
         city=request.form["city"]
-        sql = "INSERT INTO student_resume(cname ,skill_query ,experience ,education ,city ) VALUES (%s,%s,%s,%s,%s)"
+        sql = "INSERT INTO job_post(cname ,skill_query ,experience ,education ,city ) VALUES (%s,%s,%s,%s,%s)"
         val = (cname ,skill_query ,experience ,education ,city)
-    return render_template('dashboard.html')
-
-@app.route("/student-resume")
-def studentresume():
-    return render_template('student_resume.html')
+    return render_template('job_post.html')
 
 @app.route("/resume1")
 def template():
