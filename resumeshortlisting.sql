@@ -27,16 +27,24 @@ SET time_zone = "+00:00";
 -- Table structure for table `jobposting`
 --
 
-CREATE TABLE `jobposting` (
+
+CREATE TABLE `job_post` (
   `id` int(10) NOT NULL,
-  `company_id` int(10) NOT NULL,
-  `skills` varchar(100) NOT NULL,
+  `cname` int(25) NOT NULL,
+  `skill_query` varchar(100) NOT NULL,
   `experience` int(10) NOT NULL,
   `education` varchar(50) NOT NULL,
   `city` text NOT NULL,
   `generated_link` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+--
+-- Dumping data for table `JOB_POST`
+--
+INSERT INTO `job_post` (`id`, `cname`, `skill_query`, `experience`,`education`,`city`,`generate_link`) VALUES
+(1, 'TCS', 'Java,Html', 2,'BE','Ahmedabad','www.google.com'),
+(2, 'INFOSYS', 'Java,Spring', 5,'BE','MUMBAI','www.google.com'),
+(3, 'Syphosis', 'Flask', 0,'BE','Ahmedabad','www.google.com'),
+(4, 'Info', 'Laravel', 1,'BE','Baroda','www.abc.com'),
 -- --------------------------------------------------------
 
 --
