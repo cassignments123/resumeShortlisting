@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.secret_key = "abdhghsbghddvbnbds"
 
-con = pymysql.connect(port=3306,user="root",passwd="",db="resumeshortlisting")
+con = pymysql.connect(host="localhost",port=3307,user="root",passwd="",db="resumeshortlisting")
 cur = con.cursor()
 
 
@@ -34,6 +34,7 @@ def login():
             return redirect(url_for('dashboard'))
     return render_template('signin.html')
 
+global newid
 @app.route("/signup", methods=['GET','POST'])
 def signup():
     if request.method=="POST":
@@ -57,7 +58,10 @@ def signup():
             cur.execute(sql2)
             myid = cur.fetchone()
             # print(myid[0])
+           
             session['id'] = myid[0]
+            
+            newid = session['id']
             session['loggedin'] = True
             return redirect(url_for('dashboard'))
         else:
@@ -72,12 +76,33 @@ def dashboard():
     else:
         return redirect(url_for('login'))
 
-@app.route("/job-post" , methods=["GET" , "POST"])
-def jobpost():
+@app.route("/jobPost" , methods=["GET" , "POST"])
+def jobPost():
      if 'loggedin' in session:
         if request.method == "POST":
-            company_name = request.form["cname"]
-            check_id = "select id from recruiter where company_name = '"+company_name+"'"
+           # check_id = "select id from recruiter where company_name = '"+company_name+"'"
+            c_name = request.form["cname"]
+            columns = request.form.getlist('skill[]')
+            print(columns)
+            skills = request.form["skill[]"]
+            #skill_query=[]
+            #for x in columns:
+             #  skill = request.form["skill[]"]
+              # skill_query.append(getattr(skill,x))
+            experience = request.form["experience"]
+            education=request.form["education"]
+            city=request.form["city"]
+            sql2="UPDATE jobposting SET generated_link=CONCAT( 'www.',c_name,'/' , id,'/',company_id)"
+            sql3="SELECT recruiter.id FROM recruiter where company_name='"+c_name+"';"
+            val3 = cur.execute(sql3)
+            print(val3)
+            sql = "INSERT INTO jobposting(company_id,c_name,skills ,experience ,education ,city) VALUES (%s,%s,%s,%s,%s,%s)"
+            val = (val3, c_name,skills,experience ,education ,city)
+            cur.execute(sql,val)
+            cur.execute(sql2)
+            
+            con.commit()
+            return redirect(url_for('dashboard'))
         return render_template('jobPost.html')
 
 @app.route("/student_resume", methods=['GET','POST'])
@@ -86,44 +111,31 @@ def student_resume():
         name = request.form["name"]
         dob = request.form["dob"]
         email = request.form["email"]
-        number=request.form["number"]
+        contact_number=request.form["number"]
         address=request.form["address"]
         title = request.form["title"]
-        soft_skill= request.form["soft-skill"]
-        technical_skill= request.form["technical-skill"]
+        skills= request.form["technical-skill"]
         position=request.form["position"]
         company_name=request.form["company-name"]
-        period_fom=request.form["period-from"]
-        period_to = request.form["period-to"]
-        description = request.form["description"]
-        project1_title=request.form["project1-title"]
-        project1=request.form["project1"]
-        project1_tech=request.form["project1-tech"]
+        worked_from=request.form["period-from"]
+        worked_to = request.form["period-to"]
+        description = request.form["job-description"]
+        project_title=request.form["project1-title"]
+        project_description=request.form["project1"]
+        tech_used=request.form["project1-tech"]
         project2_title=request.form["project2-title"]
         project2=request.form["project2"]
         project2_tech=request.form["project2-tech"]
         education=request.form["education"]
-        language=request.form["language"]
-        sql = "INSERT INTO student_resume(name, dob, email ,number ,address ,title ,soft-skill ,technical-skill ,position ,company-name ,period-from ,period-to ,description ,project1-title ,project1 ,project1-tech ,project2-title ,project2 ,project2-tech ,education,language ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        val = (name, dob, email ,number ,address ,title ,soft_skill ,technical_skill ,position ,company_name ,period_fom ,period_to ,description ,project1_title ,project1 ,project1_tech ,project2_title ,project2 ,project2_tech ,education,language)
+        languages_known=request.form["language"]
+        sql2="SELECT J.id FROM jobposting J INNER JOIN resume_details R ON r.job_id = j.id"
+        val2 = cur.execute(sql2)
+        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known ) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        val = (val2,1,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
+        cur.execute(sql,val)
+        con.commit()
+        return redirect(url_for('home'))
     return render_template('student_resume.html')
-
-@app.route("/job_post", methods=['GET','POST'])
-def job_post():
-    if request.method=="POST":
-        cname = request.form["cname"]
-        columns = request.form.getlist('skill[]')
-        skill_query=[]
-        for x in columns:
-            skill = request.form["skill[]"]
-            skill_query.append(getattr(skill, x))
-
-        experience = request.form["experience"]
-        education=request.form["education"]
-        city=request.form["city"]
-        sql = "INSERT INTO job_post(cname ,skill_query ,experience ,education ,city ) VALUES (%s,%s,%s,%s,%s)"
-        val = (cname ,skill_query ,experience ,education ,city)
-    return render_template('job_post.html')
 
 @app.route("/resume1")
 def template():
