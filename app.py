@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.secret_key = "abdhghsbghddvbnbds"
 
-con = pymysql.connect(host="localhost",port=3307,user="root",passwd="",db="resumeshortlisting")
+con = pymysql.connect(host="localhost",port=3306,user="root",passwd="",db="resumeshortlisting")
 cur = con.cursor()
 
 
@@ -95,7 +95,7 @@ def jobPost():
             sql2="UPDATE jobposting SET generated_link=CONCAT( 'www.',c_name,'/' , id,'/',company_id)"
             sql3="SELECT recruiter.id FROM recruiter where company_name='"+c_name+"';"
             val3 = cur.execute(sql3)
-            print(val3)
+            
             sql = "INSERT INTO jobposting(company_id,c_name,skills ,experience ,education ,city) VALUES (%s,%s,%s,%s,%s,%s)"
             val = (val3, c_name,skills,experience ,education ,city)
             cur.execute(sql,val)
@@ -128,14 +128,18 @@ def student_resume():
         project2_tech=request.form["project2-tech"]
         education=request.form["education"]
         languages_known=request.form["language"]
-        sql2="SELECT J.id FROM jobposting J INNER JOIN resume_details R ON r.job_id = j.id"
+        template_id = request.form['template_id']
+        sql2="SELECT J.id FROM jobposting J INNER JOIN resume_details R ON r.job_id = J.id"
         val2 = cur.execute(sql2)
+        print(val2)
         sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known ) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        val = (val2,1,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
+        val = (val2,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
         cur.execute(sql,val)
         con.commit()
         return redirect(url_for('home'))
     return render_template('student_resume.html')
+
+
 
 @app.route("/resume1")
 def template():
@@ -148,6 +152,10 @@ def template2():
 @app.route("/resume3")
 def template3():
     return render_template("template3.html")
+
+@app.route("/student-dashboard")
+def studentDashboard():
+    return render_template("studentdashboard.html")
 
 if __name__=='__main__':
     app.run(debug=True)
