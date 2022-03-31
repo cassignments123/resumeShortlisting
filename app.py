@@ -80,27 +80,24 @@ def dashboard():
 def jobPost():
      if 'loggedin' in session:
         if request.method == "POST":
-           # check_id = "select id from recruiter where company_name = '"+company_name+"'"
             c_name = request.form["cname"]
-            columns = request.form.getlist('skill[]')
-            print(columns)
-            skills = request.form["skill[]"]
-            #skill_query=[]
-            #for x in columns:
-             #  skill = request.form["skill[]"]
-              # skill_query.append(getattr(skill,x))
+            n=int(request.form.get('hidden'))
+            #print(n)
+            skills=""
+            for i in range(0,n+1):
+                skill = request.form["skill["+str(i)+"]"]              
+                skills=skills+skill+","
+       
             experience = request.form["experience"]
             education=request.form["education"]
             city=request.form["city"]
-            sql2="UPDATE jobposting SET generated_link=CONCAT( 'www.',c_name,'/' , id,'/',company_id)"
             sql3="SELECT recruiter.id FROM recruiter where company_name='"+c_name+"';"
             val3 = cur.execute(sql3)
-            
-            sql = "INSERT INTO jobposting(company_id,c_name,skills ,experience ,education ,city) VALUES (%s,%s,%s,%s,%s,%s)"
+            sql = "INSERT INTO jobposting(company_id,c_name,skills,experience ,education ,city) VALUES (%s,%s,%s,%s,%s,%s)"
             val = (val3, c_name,skills,experience ,education ,city)
             cur.execute(sql,val)
+            sql2="UPDATE jobposting SET generated_link=CONCAT( 'www.',c_name,'/' , id,'/',company_id)"
             cur.execute(sql2)
-            
             con.commit()
             return redirect(url_for('dashboard'))
         return render_template('jobPost.html')
@@ -108,13 +105,19 @@ def jobPost():
 @app.route("/student_resume", methods=['GET','POST'])
 def student_resume():
     if request.method=="POST":
+         m=int(request.form.get('hidden1'))
+        languages_known=""
+        for i in range(0,m+1):
+            lang = request.form["language["+str(i)+"]"]
+            languages_known=languages_known+lang+","
+            
         name = request.form["name"]
         dob = request.form["dob"]
         email = request.form["email"]
         contact_number=request.form["number"]
         address=request.form["address"]
         title = request.form["title"]
-        skills= request.form["technical-skill"]
+        #skills= request.form["technical-skill"]
         position=request.form["position"]
         company_name=request.form["company-name"]
         worked_from=request.form["period-from"]
@@ -127,8 +130,15 @@ def student_resume():
         project2=request.form["project2"]
         project2_tech=request.form["project2-tech"]
         education=request.form["education"]
-        languages_known=request.form["language"]
+        #languages_known=request.form["language"]
         template_id = request.form['template_id']
+        n=int(request.form.get('hidden'))
+        skills=""
+        for i in range(0,n+1):
+            skill = request.form["technical-skill["+str(i)+"]"]
+            #skills.append(skill)           
+            skills=skills+skill+","
+        
         sql2="SELECT J.id FROM jobposting J INNER JOIN resume_details R ON r.job_id = J.id"
         val2 = cur.execute(sql2)
         print(val2)
