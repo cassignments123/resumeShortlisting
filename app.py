@@ -105,7 +105,7 @@ def jobPost():
 @app.route("/student_resume", methods=['GET','POST'])
 def student_resume():
     if request.method=="POST":
-         m=int(request.form.get('hidden1'))
+        m=int(request.form.get('hidden1'))
         languages_known=""
         for i in range(0,m+1):
             lang = request.form["language["+str(i)+"]"]
