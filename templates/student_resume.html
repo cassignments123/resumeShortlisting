@@ -169,9 +169,10 @@
                             <input type="button" class="btn btn-lg language-btn form-input" value="Add skills" onclick="createNewSoftSkill();"/>
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6">
-                            <input type="text" name="technical-skill" placeholder="Technical skills" class="form-control  form-input ">
-                            <div id="newElementId2"></div>
-                            <input type="button" class="btn btn-lg language-btn form-input" value="Add skills" onclick="createNewTechSkill();"/>
+                           <input type="hidden" name="hidden" id="hidden">
+                           <input type="text" name="technical-skill[0]" placeholder="Technical skills" class="form-control  form-input ">
+                           <div id="newElementId2"></div>
+                           <input type="button" class="btn btn-lg language-btn form-input" value="Add skills" onclick="createNewTechSkill();"/>
                         </div>
                     </div>
                     <label for="expereince" style="margin-top: 15px;">
@@ -256,7 +257,8 @@
                             <label for="languages" class="student-form-label">
                                 Languages
                             </label>
-                            <input type="text" name="language" placeholder="Languages known" class="form-control  form-input ">
+                            <input type="hidden" name="hidden1" id="hidden1">
+                            <input type="text" name="language[0]" placeholder="Languages known" class="form-control  form-input ">
                             <div id="newElementId"></div>
                                 <input type="button" class="btn btn-lg language-btn form-input" value="Add language" onclick="createNewElement();"/>
                             </div>
@@ -276,12 +278,14 @@
 
     <!-- Optional JavaScript; choose one of the two! -->
     <script type="text/JavaScript">
+        i=0,j=0;
         function createNewElement() {
             // First create a DIV element.
             var txtNewInputBox = document.createElement('div');
-        
+            j=j+1;
+            document.getElementById("hidden1").value=j;
             // Then add the content (a new input box) of the element.
-            txtNewInputBox.innerHTML = '<input type="text" placeholder="Languages known" name="language" required class="form-control form-input" style="margin-top:10px;">';
+            txtNewInputBox.innerHTML = '<input type="text" placeholder="Languages known" name="language['+j+']" id="language['+j+']" required class="form-control form-input" style="margin-top:10px;">';
         
             // Finally put it where it is supposed to appear.
             document.getElementById("newElementId").appendChild(txtNewInputBox);
@@ -299,9 +303,10 @@
         function createNewTechSkill() {
             // First create a DIV element.
             var txtNewInputBox = document.createElement('div');
-        
+            i=i+1;
+            document.getElementById("hidden").value=i;
             // Then add the content (a new input box) of the element.
-            txtNewInputBox.innerHTML = '<input type="text" placeholder="Technical skills" name="technical-skill" required class="form-control form-input" style="margin-top:10px;">';
+            txtNewInputBox.innerHTML = '<input type="text" placeholder="Technical skills" name="technical-skill['+i+']" required class="form-control form-input" style="margin-top:10px;">';
         
             // Finally put it where it is supposed to appear.
             document.getElementById("newElementId2").appendChild(txtNewInputBox);
