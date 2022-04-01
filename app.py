@@ -1,3 +1,5 @@
+from traceback import print_tb
+from django.shortcuts import render
 from flask import Flask,render_template, request,session, redirect, url_for, flash
 
 import pymysql.cursors
@@ -35,6 +37,7 @@ def login():
     return render_template('signin.html')
 
 global newid
+
 @app.route("/signup", methods=['GET','POST'])
 def signup():
     if request.method=="POST":
@@ -54,12 +57,13 @@ def signup():
             else:
                 flash("Password and confirm password should be same!")
                 return redirect(url_for('signup'))
-            sql2 = "SELECT id FROM recruiter WHERE company_email = '"+email+"'"
+            sql2 = "SELECT * FROM recruiter WHERE company_email = '"+email+"'"
             cur.execute(sql2)
             myid = cur.fetchone()
-            # print(myid[0])
+            print(myid[2])
            
             session['id'] = myid[0]
+          
             
             newid = session['id']
             session['loggedin'] = True
@@ -69,38 +73,88 @@ def signup():
             return redirect(url_for('signup'))
     return render_template('signup.html')
 
-@app.route("/dashboard")
-def dashboard():
-    if 'loggedin' in session:
-        return render_template('dashboard.html')
-    else:
-        return redirect(url_for('login'))
+my_postings = 0
+my_links = ()
 
 @app.route("/jobPost" , methods=["GET" , "POST"])
 def jobPost():
-     if 'loggedin' in session:
-        if request.method == "POST":
-            c_name = request.form["cname"]
-            n=int(request.form.get('hidden'))
-            #print(n)
-            skills=""
-            for i in range(0,n+1):
-                skill = request.form["skill["+str(i)+"]"]              
-                skills=skills+skill+","
+
+    if request.method == "POST":
+    
+        c_name = request.form["cname"]
        
-            experience = request.form["experience"]
-            education=request.form["education"]
-            city=request.form["city"]
-            sql3="SELECT recruiter.id FROM recruiter where company_name='"+c_name+"';"
-            val3 = cur.execute(sql3)
-            sql = "INSERT INTO jobposting(company_id,c_name,skills,experience ,education ,city) VALUES (%s,%s,%s,%s,%s,%s)"
-            val = (val3, c_name,skills,experience ,education ,city)
-            cur.execute(sql,val)
-            sql2="UPDATE jobposting SET generated_link=CONCAT( 'www.',c_name,'/' , id,'/',company_id)"
-            cur.execute(sql2)
-            con.commit()
-            return redirect(url_for('dashboard'))
-        return render_template('jobPost.html')
+        
+        n=int(request.form.get('hidden'))
+        # print(n)/
+        skills=""
+        for i in range(0,n+1):
+            skill = request.form["skill["+str(i)+"]"]              
+            skills=skills+skill+","
+    
+        experience = request.form["experience"]
+        education=request.form["education"]
+        city=request.form["city"]
+        # sql1= "SELECT r.id FROM recruiter r inner join jobposting j on j.c_name = r.company_name WHERE j.c_name = '"+c_name+"'"
+        # cur.execute(sql1)
+        # sql = "INSERT INTO jobposting(company_id,c_name,skills,experience ,education ,city) VALUES (%s,%s,%s,%s,%s,%s)"
+        # val = ( cur.execute(sql1), c_name,skills,experience ,education ,city)
+        # cur.execute(sql,val)
+        # con.commit()
+        sql = "SELECT * FROM recruiter WHERE company_name = '"+c_name+"'"
+        cur.execute(sql)
+        one_company_name = cur.fetchone()
+        company_id = one_company_name[0]
+
+        sql2 = "INSERT INTO jobposting (company_id, c_name, skills, experience, education, city) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (company_id, c_name, skills,experience,  education, city)
+        cur.execute(sql2, val)
+        con.commit()
+        sql2="UPDATE jobposting SET generated_link=CONCAT( c_name,'/' , id)"
+        cur.execute(sql2)
+        con.commit()
+        sql4 = "SELECT count(*) from jobposting where c_name = '"+c_name+"'"
+        cur.execute(sql4)
+        mycnt = cur.fetchall()
+        global my_postings
+        my_postings = mycnt[0][0]
+
+        # sql5 = "SELECT * FROM jobposting WHERE c_name = '"+c_name+"'"
+        # cur.execute(sql5)
+        # all_details = cur.fetchone()
+        # global mycompany
+        # mycompany = all_details[2]
+
+        sql5 = "SELECT generated_link from jobposting WHERE c_name ='"+c_name+"'"
+        cur.execute(sql5)
+        global my_links
+        my_links = cur.fetchall()
+        
+        
+        return redirect(url_for('dashboard'))
+    return render_template('jobPost.html')
+
+@app.route("/dashboard")
+def dashboard():
+    if 'loggedin' in session:
+       
+        return render_template('dashboard.html', job_posting_number = my_postings, my_links=my_links)
+    else:
+        return redirect(url_for('login'))
+
+
+myid=6
+mycompany = "company"
+@app.route("/<company>/<id>")
+def job_id(company,id):
+    global myid
+    global mycompany
+    mycompany = company
+    myid = id
+    print(myid)
+
+    print(mycompany)
+    session['my_id']  = myid
+    return redirect(url_for('student_resume'))
 
 @app.route("/student_resume", methods=['GET','POST'])
 def student_resume():
@@ -136,18 +190,30 @@ def student_resume():
         skills=""
         for i in range(0,n+1):
             skill = request.form["technical-skill["+str(i)+"]"]
-            #skills.append(skill)           
             skills=skills+skill+","
         
-        sql2="SELECT J.id FROM jobposting J INNER JOIN resume_details R ON r.job_id = J.id"
-        val2 = cur.execute(sql2)
-        print(val2)
+        # sql2="SELECT J.id FROM jobposting J INNER JOIN resume_details R ON r.job_id = J.id"
+        # val2 = cur.execute(sql2)
+        # print(val2)
+
+        mine_id = session.get('my_id')
         sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known ) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        val = (val2,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
+        val = (mine_id,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
         cur.execute(sql,val)
         con.commit()
         return redirect(url_for('home'))
+    
     return render_template('student_resume.html')
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -166,6 +232,12 @@ def template3():
 @app.route("/student-dashboard")
 def studentDashboard():
     return render_template("studentdashboard.html")
+
+# @app.route("/company/<id>")
+# def myid(id):
+#     print(id)
+#     return redirect(url_for('home'))
+
 
 if __name__=='__main__':
     app.run(debug=True)

@@ -48,9 +48,18 @@
                         </a>
 
                         <ul id="myul1">
-                            
+                            {% if job_posting_number>0 %}
+                                {% for link in range(0,job_posting_number) %}  
+                                    <li><a href={{my_links[link][0]}}>127.0.0.1/{{my_links[link][0]}}</a></li>  
+                                {% endfor %}                   
+                           
+                            {% else %}
                             <li><a href="#">No Posting</a></li>
+                         
+                            {% endif %} 
                           
+
+                            
                         </ul>
 
                         <!-- <div id="" -->
