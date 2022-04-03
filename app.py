@@ -1,5 +1,3 @@
-from traceback import print_tb
-from django.shortcuts import render
 from flask import Flask,render_template, request,session, redirect, url_for, flash
 
 import pymysql.cursors
@@ -12,7 +10,7 @@ app.secret_key = "abdhghsbghddvbnbds"
 con = pymysql.connect(host="localhost",port=3306,user="root",passwd="",db="resumeshortlisting")
 cur = con.cursor()
 
-
+my_links = ()
 @app.route("/")
 def home():
     return render_template('index.html')
@@ -25,6 +23,18 @@ def login():
         check_email = "SELECT * FROM recruiter WHERE company_email = '"+email+"'"
         cur.execute(check_email)
         get_one_email = cur.fetchone()
+
+        sql4 = "SELECT count(*) from jobposting where c_name = '"+get_one_email[2]+"'"
+        cur.execute(sql4)
+        mycnt = cur.fetchall()
+        global my_postings
+        my_postings = mycnt[0][0]
+
+        sql5 = "SELECT generated_link from jobposting WHERE c_name ='"+get_one_email[2]+"'"
+        cur.execute(sql5)
+        global my_links
+        my_links = cur.fetchall()
+       
         if (not get_one_email):
             flash("You entered wrong email address")
             return redirect(url_for('login'))
@@ -74,7 +84,6 @@ def signup():
     return render_template('signup.html')
 
 my_postings = 0
-my_links = ()
 
 @app.route("/jobPost" , methods=["GET" , "POST"])
 def jobPost():
@@ -109,7 +118,7 @@ def jobPost():
         val = (company_id, c_name, skills,experience,  education, city)
         cur.execute(sql2, val)
         con.commit()
-        sql2="UPDATE jobposting SET generated_link=CONCAT( c_name,'/' , id)"
+        sql2="UPDATE jobposting SET generated_link=CONCAT(id)"
         cur.execute(sql2)
         con.commit()
         sql4 = "SELECT count(*) from jobposting where c_name = '"+c_name+"'"
@@ -143,19 +152,20 @@ def dashboard():
 
 
 myid=6
-mycompany = "company"
-@app.route("/<company>/<id>")
-def job_id(company,id):
+# mycompany = "company"
+@app.route("/<id>")
+def job_id(id):
     global myid
-    global mycompany
-    mycompany = company
+    # global mycompany
+    # mycompany = company
     myid = id
     print(myid)
 
-    print(mycompany)
+    # print(mycompany)
     session['my_id']  = myid
     return redirect(url_for('student_resume'))
 
+myresume_link = ""
 @app.route("/student_resume", methods=['GET','POST'])
 def student_resume():
     if request.method=="POST":
@@ -197,25 +207,69 @@ def student_resume():
         # print(val2)
 
         mine_id = session.get('my_id')
-        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known ) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         val = (mine_id,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
         cur.execute(sql,val)
+        con.commit()       
+
+        sql2 = "SELECT id FROM resume_details WHERE email = '"+email+"'"
+        cur.execute(sql2)
+        link_id = cur.fetchone()
+
+        resume_link = f"{link_id[0]}"
+        print(resume_link)
+
+        sql3="UPDATE resume_details SET resume_link= '"+resume_link+"'"
+        cur.execute(sql3)
         con.commit()
-        return redirect(url_for('home'))
+
+        global myresume_link
+        myresume_link = resume_link
+
+        return redirect(url_for('student_generated_resume'))
     
     return render_template('student_resume.html')
 
+@app.route('/student_generated_resume')
+def student_generated_resume():
+    return render_template("resume_link.html", myresume_link = myresume_link)
 
 
+all_student_data = ""
+lang_cnt = 0
+@app.route("/resume/<id>")
+def show_student_resume(id):
+    sql ="SELECT * FROM resume_details WHERE id = '"+id+"'"
+    cur.execute(sql)
+    global all_student_data
+    all_student_data = cur.fetchone()
+    print(all_student_data)
+    template_id = all_student_data[2]
+    
+    if template_id == 1:
+        print(template_id)
+        # print(len(all_student_data[19].split(',')))
+        # global lang_cnt
+        # lang_cnt = len(all_student_data[19].split(','))
+        # lang_cnt = int(lang_cnt)
+        return redirect(url_for("newTemplate1"))
+    elif template_id == 2:
+        return redirect(url_for("template2"))
+    else : 
+        return redirect(url_for("template3"))
 
 
+@app.route('/new_template1')
+def newTemplate1():
+    return render_template('newTemplate1.html' , all_data = all_student_data )
 
+@app.route('/new_template2')
+def newTemplate2():
+    pass
 
-
-
-
-
-
+@app.route('/new_template3')
+def newTemplate3():
+    pass
 
 @app.route("/resume1")
 def template():
@@ -234,7 +288,7 @@ def studentDashboard():
     return render_template("studentdashboard.html")
 
 # @app.route("/company/<id>")
-# def myid(id):
+# def myid(id):~
 #     print(id)
 #     return redirect(url_for('home'))
 
