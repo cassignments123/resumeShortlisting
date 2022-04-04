@@ -21,6 +21,7 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
         check_email = "SELECT * FROM recruiter WHERE company_email = '"+email+"'"
+        con.ping(reconnect = True)
         cur.execute(check_email)
         get_one_email = cur.fetchone()
 
@@ -207,8 +208,8 @@ def student_resume():
         # print(val2)
 
         mine_id = session.get('my_id')
-        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        val = (mine_id,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known)
+        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known,project2_title,project2_description) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        val = (mine_id,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known, project2_title , project2)
         cur.execute(sql,val)
         con.commit()       
 
@@ -237,6 +238,7 @@ def student_generated_resume():
 
 all_student_data = ""
 lang_cnt = 0
+skill_cnt = 0
 @app.route("/resume/<id>")
 def show_student_resume(id):
     sql ="SELECT * FROM resume_details WHERE id = '"+id+"'"
@@ -246,30 +248,33 @@ def show_student_resume(id):
     print(all_student_data)
     template_id = all_student_data[2]
     
-    if template_id == 1:
-        print(template_id)
-        # print(len(all_student_data[19].split(',')))
-        # global lang_cnt
-        # lang_cnt = len(all_student_data[19].split(','))
-        # lang_cnt = int(lang_cnt)
+    print(len(all_student_data[19].split(',')))
+    global lang_cnt
+    lang_cnt = len(all_student_data[19].split(','))
+    lang_cnt = int(lang_cnt)
+    global skill_cnt
+    skill_cnt = len(all_student_data[9].split(','))
+    skill_cnt = int(skill_cnt)
+
+    if template_id == 1:   
         return redirect(url_for("newTemplate1"))
     elif template_id == 2:
-        return redirect(url_for("template2"))
+        return redirect(url_for("newTemplate2"))
     else : 
-        return redirect(url_for("template3"))
+        return redirect(url_for("newTemplate3"))
 
 
 @app.route('/new_template1')
 def newTemplate1():
-    return render_template('newTemplate1.html' , all_data = all_student_data )
+    return render_template('newTemplate1.html' , all_data = all_student_data, lang_cnt = lang_cnt , skill_cnt = skill_cnt)
 
 @app.route('/new_template2')
 def newTemplate2():
-    pass
+        return render_template('newTemplate2.html' , all_data = all_student_data, lang_cnt = lang_cnt , skill_cnt = skill_cnt )
 
 @app.route('/new_template3')
 def newTemplate3():
-    pass
+        return render_template('newTemplate3.html' , all_data = all_student_data, lang_cnt = lang_cnt , skill_cnt = skill_cnt )
 
 @app.route("/resume1")
 def template():
