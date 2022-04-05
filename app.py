@@ -15,9 +15,69 @@ my_links = ()
 def home():
     return render_template('index.html')
 
+
+@app.route("/dashboard")
+def dashboard():
+    if 'loggedin' in session:
+        sql = "SELECT id FROM jobposting WHERE company_id = '"+str(mine_id)+"'"
+        cur.execute(sql)
+        ids = cur.fetchall()
+        print(ids)
+        print(my_links)
+        return render_template('dashboard.html', job_posting_number = my_postings, my_links=my_links)
+    else:
+        return redirect(url_for('login'))
+
+@app.route("/dashboard/<id>")
+def dashboard_id(id):
+    if 'loggedin' in session:
+        sql = "SELECT * FROM resume_details WHERE job_id = '"+str(id)+"'"
+        cur.execute(sql)
+        details = cur.fetchall()
+
+        sql2 = "SELECT * FROM jobposting WHERE id ='"+str(id)+"'"
+        cur.execute(sql2)
+        recruiter_needs = cur.fetchone()
+
+        needs_skills = recruiter_needs[3]
+        needs_skills_list = needs_skills.split(",")
+        needs_experience = recruiter_needs[4]
+        needs_education = recruiter_needs[5]
+        needs_city = recruiter_needs[6]
+
+        shortlisted_resume_links = []
+        counter = 1
+        
+        for x in range(0, len(details)):
+            skills = details[x][9] 
+            skills_list = skills.split(',')
+            experience = details[x][23]
+            education = details[x][18]
+            city = details[x][24]
+
+            check = all(item in needs_skills_list for item in skills_list)
+            if needs_experience <= experience:
+                print("YES")
+            else :
+                print("no")
+            if needs_skills_list.sort() == skills_list.sort() and needs_education == education  and needs_experience <= experience and needs_city == city :
+                resume_links = details[x][20]
+                shortlisted_resume_links.append(resume_links)
+
+            
+        
+        length_of_list = len(shortlisted_resume_links)
+
+       
+        return render_template('dashboard2.html', job_posting_number = my_postings, my_links=my_links, resume_links = shortlisted_resume_links, counter=counter, mylength=length_of_list)
+    else:
+        return redirect(url_for('login'))
+
+
 @app.route("/signin", methods=['GET','POST'])
 def login():
     if request.method=="POST":
+   
         email = request.form["email"]
         password = request.form["password"]
         check_email = "SELECT * FROM recruiter WHERE company_email = '"+email+"'"
@@ -35,7 +95,14 @@ def login():
         cur.execute(sql5)
         global my_links
         my_links = cur.fetchall()
+
+        sql6 = "SELECT id FROM recruiter WHERE company_email = '"+email+"'"
+        cur.execute(sql6)
+        mine_id2 = cur.fetchone()
+        global mine_id 
+        mine_id = mine_id2[0]
        
+      
         if (not get_one_email):
             flash("You entered wrong email address")
             return redirect(url_for('login'))
@@ -48,10 +115,13 @@ def login():
     return render_template('signin.html')
 
 global newid
+ 
+mine_id = 0
 
 @app.route("/signup", methods=['GET','POST'])
 def signup():
     if request.method=="POST":
+    
         email = request.form["email"]
         check_email = "SELECT company_email FROM recruiter WHERE company_email = '"+email+"'"
         cur.execute(check_email)
@@ -85,6 +155,8 @@ def signup():
     return render_template('signup.html')
 
 my_postings = 0
+
+print(mine_id)
 
 @app.route("/jobPost" , methods=["GET" , "POST"])
 def jobPost():
@@ -138,18 +210,9 @@ def jobPost():
         cur.execute(sql5)
         global my_links
         my_links = cur.fetchall()
-        
-        
+
         return redirect(url_for('dashboard'))
     return render_template('jobPost.html')
-
-@app.route("/dashboard")
-def dashboard():
-    if 'loggedin' in session:
-       
-        return render_template('dashboard.html', job_posting_number = my_postings, my_links=my_links)
-    else:
-        return redirect(url_for('login'))
 
 
 myid=6
@@ -194,6 +257,8 @@ def student_resume():
         project2_title=request.form["project2-title"]
         project2=request.form["project2"]
         project2_tech=request.form["project2-tech"]
+        experience = request.form["expereince"]
+        city = request.form["city"]
         education=request.form["education"]
         #languages_known=request.form["language"]
         template_id = request.form['template_id']
@@ -208,8 +273,8 @@ def student_resume():
         # print(val2)
 
         mine_id = session.get('my_id')
-        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known,project2_title,project2_description) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        val = (mine_id,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known, project2_title , project2)
+        sql = "INSERT INTO resume_details(job_id, template_id, name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education,languages_known,project2_title,project2_description,experience,city) VALUES (%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        val = (mine_id,template_id,name, dob, email ,contact_number ,address ,title ,skills,company_name ,position,worked_from ,worked_to ,description ,project_title ,project_description ,tech_used ,education ,languages_known, project2_title , project2 , experience,city)
         cur.execute(sql,val)
         con.commit()       
 
@@ -220,7 +285,7 @@ def student_resume():
         resume_link = f"{link_id[0]}"
         print(resume_link)
 
-        sql3="UPDATE resume_details SET resume_link= '"+resume_link+"'"
+        sql3="UPDATE resume_details SET resume_link= CONCAT(id)"
         cur.execute(sql3)
         con.commit()
 
@@ -263,6 +328,31 @@ def show_student_resume(id):
     else : 
         return redirect(url_for("newTemplate3"))
 
+@app.route("/dashboard/resume/<id>")
+def show_student_resume2(id):
+    sql ="SELECT * FROM resume_details WHERE id = '"+id+"'"
+    cur.execute(sql)
+    global all_student_data
+    all_student_data = cur.fetchone()
+    print(all_student_data)
+    template_id = all_student_data[2]
+    
+    print(len(all_student_data[19].split(',')))
+    global lang_cnt
+    lang_cnt = len(all_student_data[19].split(','))
+    lang_cnt = int(lang_cnt)
+    global skill_cnt
+    skill_cnt = len(all_student_data[9].split(','))
+    skill_cnt = int(skill_cnt)
+
+    if template_id == 1:   
+        return redirect(url_for("newTemplate1"))
+    elif template_id == 2:
+        return redirect(url_for("newTemplate2"))
+    else : 
+        return redirect(url_for("newTemplate3"))
+
+
 
 @app.route('/new_template1')
 def newTemplate1():
@@ -292,10 +382,32 @@ def template3():
 def studentDashboard():
     return render_template("studentdashboard.html")
 
-# @app.route("/company/<id>")
-# def myid(id):~
-#     print(id)
-#     return redirect(url_for('home'))
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
+@app.route("/forgot-password", methods=["GET","POST"])
+def forget():
+    if request.method == "POST":
+        email = request.form['email']
+        new_pwd = request.form['newpwd']
+        
+        # user = User.query.filter_by(email=email).first()
+        sql = "SELECT * FROM recruiter WHERE company_email='"+email+"'"
+        cur.execute(sql)
+        myresult = cur.fetchone()
+        if not myresult:
+            flash("That email does not exist!")
+            return render_template("updatepwd.html")
+        else:
+            sql = "UPDATE recruiter SET password='"+new_pwd+"' WHERE company_email='"+email+"'"
+            cur.execute(sql)
+            con.commit()
+            return redirect(url_for('login'))
+    return render_template("updatepwd.html")
 
 
 if __name__=='__main__':

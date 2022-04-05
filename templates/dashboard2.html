@@ -50,7 +50,7 @@
                         <ul id="myul1">
                             {% if job_posting_number>0 %}
                                 {% for link in range(0,job_posting_number) %}  
-                                    <li><a href={{my_links[link][0]}}>127.0.0.1/{{my_links[link][0]}}</a></li>  
+                                    <li><a href=/{{my_links[link][0]}}>127.0.0.1/{{my_links[link][0]}}</a></li>  
                                 {% endfor %}                   
                            
                             {% else %}
@@ -94,9 +94,41 @@
                 </div>
                 <div class="col-md-8 col-sm-12 col-lg-8 col-12">
                     <div style="text-align:center;">
-                        
+                        {% if job_posting_number>0 %}
+                                 
+                        <table class="table table-hover">
+                            <thead>
+                              <tr>
+                                <th scope="col">Number Of Candidates</th>
+                                <th scope="col">resume link</th>
+                            
+                              </tr>
+                            </thead>
+                            <tbody>
+                                {% for links in range(0,mylength) %}
+                              <tr>
+                                <th scope="row">{{links+1}}</th>
+                                
+                                <td><a href="resume/{{resume_links[links]}}" target="_blank">127.0.0.1/{{resume_links[links]}}</a></td>
+                               
+                              </tr>
+                              {% endfor %}
+                              <!-- <tr>
+                                <th scope="row">2</th>
+                                <td>Jacob</td>
+                          
+                              </tr>
+                              <tr>
+                                <th scope="row">3</th>
+                                <td>Jacob</td>
+                               
+                              </tr> -->
+                            </tbody>
+                          </table>              
+                           
+                            {% else %}
                             <h1 class="banner-h1">
-                                {{job_posting_number}} Job Posted
+                                No Job Posting
                             </h1>
                             <a href="{{url_for('jobPost')}}">
                                 <button class="btn btn-lg create-btn">
@@ -104,7 +136,7 @@
                                 </button>
                             </a>
                          
-                        
+                            {% endif %} 
                         </div>
                 </div>
                 <div class="col-md-2 col-sm-12 col-lg-2 col-12">
