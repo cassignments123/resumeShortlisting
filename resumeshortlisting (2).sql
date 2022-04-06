@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 04, 2022 at 09:43 AM
+-- Generation Time: Apr 06, 2022 at 08:18 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.27
 
@@ -38,13 +38,6 @@ CREATE TABLE `jobposting` (
   `generated_link` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `jobposting`
---
-
-INSERT INTO `jobposting` (`id`, `company_id`, `c_name`, `skills`, `experience`, `education`, `city`, `generated_link`) VALUES
-(1, 1, 'food', 'python,java,', 1, 'BE', 'Banglore', '1');
-
 -- --------------------------------------------------------
 
 --
@@ -57,13 +50,6 @@ CREATE TABLE `recruiter` (
   `company_name` varchar(100) NOT NULL,
   `password` varchar(16) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `recruiter`
---
-
-INSERT INTO `recruiter` (`id`, `company_email`, `company_name`, `password`) VALUES
-(1, 'test@test.com', 'food', '12345678');
 
 -- --------------------------------------------------------
 
@@ -94,16 +80,10 @@ CREATE TABLE `resume_details` (
   `languages_known` varchar(100) NOT NULL,
   `resume_link` varchar(10) NOT NULL,
   `project2_title` varchar(50) NOT NULL,
-  `project2_description` varchar(1000) NOT NULL
+  `project2_description` varchar(1000) NOT NULL,
+  `experience` int(11) NOT NULL,
+  `city` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `resume_details`
---
-
-INSERT INTO `resume_details` (`id`, `job_id`, `template_id`, `name`, `dob`, `email`, `contact_number`, `address`, `title`, `skills`, `company_name`, `position`, `worked_from`, `worked_to`, `description`, `project_title`, `project_description`, `tech_used`, `education`, `languages_known`, `resume_link`, `project2_title`, `project2_description`) VALUES
-(1, 1, 2, 'James', '2022-03-31', 'james12@gmail.com', 2147483647, 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'Java,Python,C++,C,Laravel,', 'ABC', 'Backend developer', 'Dec,2015', 'June,2020', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'project1', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'laravel', 'BE', 'english,hindi,Gujarati,French,Sindhi,', '2', 'project2', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'),
-(2, 1, 3, 'Piya Sharma', '2022-03-28', 'piya23@gmail.com', 2147483647, 'KH-5\r\nSector 16', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'Java,Python,C++,C,Laravel,', 'XYZ', 'Software engineer', 'March,2015', 'June,2020', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'project1', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'laravel', 'BE', 'english,hindi,Gujarati,French,', '2', 'project2', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.');
 
 --
 -- Indexes for dumped tables
@@ -135,19 +115,19 @@ ALTER TABLE `resume_details`
 -- AUTO_INCREMENT for table `jobposting`
 --
 ALTER TABLE `jobposting`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `recruiter`
 --
 ALTER TABLE `recruiter`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `resume_details`
 --
 ALTER TABLE `resume_details`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

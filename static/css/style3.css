@@ -18,6 +18,10 @@ html{
     
     height:100%;
 }
+.logo-1{
+  height: 300px;
+  width: 100%;
+}
 .logo{
   height: 120px;
   width: 120px;

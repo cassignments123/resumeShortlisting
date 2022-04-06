@@ -56,10 +56,6 @@ def dashboard_id(id):
             city = details[x][24]
 
             check = all(item in needs_skills_list for item in skills_list)
-            if needs_experience <= experience:
-                print("YES")
-            else :
-                print("no")
             if needs_skills_list.sort() == skills_list.sort() and needs_education == education  and needs_experience <= experience and needs_city == city :
                 resume_links = details[x][20]
                 shortlisted_resume_links.append(resume_links)
