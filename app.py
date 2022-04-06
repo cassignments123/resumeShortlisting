@@ -120,6 +120,7 @@ def signup():
     
         email = request.form["email"]
         check_email = "SELECT company_email FROM recruiter WHERE company_email = '"+email+"'"
+        con.ping(reconnect=True)
         cur.execute(check_email)
         first_email = cur.fetchone()
         if(not first_email):
