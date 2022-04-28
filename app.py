@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.secret_key = "abdhghsbghddvbnbds"
 
-con = pymysql.connect(host="localhost",port=3306,user="root",passwd="",db="resumeshortlisting")
+con = pymysql.connect(host="localhost",port=3307,user="root",passwd="",db="resumeshortlisting")
 cur = con.cursor()
 
 my_links = ()
